@@ -13,9 +13,12 @@ def resize(path: str, size: ImageSize) -> T_Image:
         img = img.resize(size)
     return img
 
-def save_image(img: T_Image, path):
+def get_new_name(path: str, size: ImageSize) -> str:
     split_path = os.path.splitext(path)
-    img.save(f'{split_path[0]}-{size[0]}x{size[1]}{split_path[1]}')
+    return f'{split_path[0]}-{size[0]}x{size[1]}{split_path[1]}'
+
+def save_image(img: T_Image, path: str):
+    img.save(path)
     
 def parse_size(size: str) -> ImageSize:
     size = size.lower()
@@ -57,6 +60,8 @@ def resize_images(image_paths: List[str], image_sizes: List[ImageSize]):
     for path in image_paths:
         for size in image_sizes:
             img = resize(path, size)
+            new_name = get_new_name(path, size)
+            save_image(img, new_name)
 
 def get_parser() -> ArgumentParser:
     parser = ArgumentParser(description='Resize images')
