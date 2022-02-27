@@ -9,7 +9,7 @@ Number = Union[float, int]
 ImageSize = Tuple[Number, Number]    # W x H
 ImageFile = Union[io.BytesIO, str]   # filepath or file-like object
 
-def get_PIL_format_from_mimetype(mimetype: str) -> str:
+def get_PIL_format_from_mimetype(mimetype: str) -> Union[str, None]:
     """Return valid PIL format for a given mimetype"""
     d = {
         'image/bmp': 'BMP',
@@ -23,7 +23,7 @@ def get_PIL_format_from_mimetype(mimetype: str) -> str:
         'image/jpx': 'JPEG2000',
         'image/jpm': 'JPEG2000',
     }
-    return d[mimetype]
+    return d.get(mimetype)
 
 def resize(f_img: ImageFile, size: ImageSize) -> T_Image:
     with Image.open(f_img) as img:
