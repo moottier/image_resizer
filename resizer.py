@@ -2,14 +2,31 @@ from PIL import Image
 from PIL.Image import Image as T_Image
 from typing import List, Tuple, Union
 from argparse import ArgumentParser
-import sys, re, os
+import re, os, io
 
 # Types
 Number = Union[float, int]
-ImageSize = Tuple[Number, Number]    # L x H
+ImageSize = Tuple[Number, Number]    # W x H
+ImageFile = Union[io.BytesIO, str]   # filepath or file-like object
 
-def resize(path: str, size: ImageSize) -> T_Image:
-    with Image.open(path) as img:
+def get_PIL_format_from_mimetype(mimetype: str) -> str:
+    """Return valid PIL format for a given mimetype"""
+    d = {
+        'image/bmp': 'BMP',
+        'image/gif': 'GIF',
+        'image/vnd.microsoft.icon': 'ICO',
+        'image/x-icon': 'ICO',
+        'image/jpeg': 'JPEG',
+        'image/png': 'PNG',
+        'image/webp': 'JPEG2000',
+        'image/jp2': 'JPEG2000',
+        'image/jpx': 'JPEG2000',
+        'image/jpm': 'JPEG2000',
+    }
+    return d[mimetype]
+
+def resize(f_img: ImageFile, size: ImageSize) -> T_Image:
+    with Image.open(f_img) as img:
         img = img.resize(size)
     return img
 
@@ -17,8 +34,8 @@ def get_new_name(path: str, size: ImageSize) -> str:
     split_path = os.path.splitext(path)
     return f'{split_path[0]}-{size[0]}x{size[1]}{split_path[1]}'
 
-def save_image(img: T_Image, path: str):
-    img.save(path)
+def save_image(img: T_Image, f_img: ImageFile, format=None):
+    img.save(f_img, format)
     
 def parse_size(size: str) -> ImageSize:
     size = size.lower()
@@ -56,8 +73,8 @@ def get_sizes(sizes: List[str]) -> List[ImageSize]:
         image_sizes.append(parse_size(size))            
     return image_sizes
 
-def resize_images(image_paths: List[str], image_sizes: List[ImageSize]):
-    for path in image_paths:
+def resize_images(paths: List[str], image_sizes: List[ImageSize]):    # TODO: needs to handle bytes not just fp
+    for path in paths:
         for size in image_sizes:
             img = resize(path, size)
             new_name = get_new_name(path, size)
